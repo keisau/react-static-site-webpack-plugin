@@ -1,0 +1,38 @@
+{
+  "name": "zingtaai",
+  "version": "1.0.0-beta.1",
+  "description": "A very simple static site generator using React",
+  "main": "lib/index.js",
+  "bin": { "zingtaai": "./bin/zingtaai" },
+  "scripts": {
+    "prepublish": "yarn run clean && yarn run build",
+    "build": "./node_modules/.bin/gulp lib:build",
+    "watch": "./node_modules/.bin/gulp",
+    "clean": "./node_modules/.bin/gulp lib:clean"
+  },
+  "repository": {
+    "url": "git@github.com:pierresaux/zingtaai.git",
+    "type": "git"
+  },
+  "author": "Kei-sau CHING <keisau.ching@pierresaux.me>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.18.2",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
+    "babel-preset-es2016": "^6.16.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-3": "^6.17.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-clean": "^0.3.2",
+    "gulp-util": "^3.0.7"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "cli": "^1.0.1",
+    "handlebars": "^4.0.6",
+    "mkdirp": "^0.5.1",
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2"
+  }
+}
