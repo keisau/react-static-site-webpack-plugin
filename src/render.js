@@ -6,6 +6,7 @@ import React from 'react'
 
 import { mkdirp, fs } from './utils'
 
+/* dfs on the route tree, generate index.html upon leaf nodes */
 async function _render(node, prefix, options) {
   const { name, app, children } = node.props
   let source = '{{{ app }}}'
@@ -18,13 +19,17 @@ async function _render(node, prefix, options) {
 
   if (app != null) {
     try {
-      const destPath = path.resolve(prefix, name, 'index.html')
+      const destPath = path.resolve(prefix, name)
+      const destFile = path.resolve(destPath, 'index.html')
 
       // mkdirp
-      await mkdirp.mkdirpAsync(path.resolve(prefix, name))
+      await mkdirp.mkdirpAsync(destPath)
+
+      // chdir
+      process.chdir(destPath)
 
       // write rendered html to file
-      await fs.writeFileAsync(destPath, template({
+      await fs.writeFileAsync(destFile, template({
         app: renderToString(app)
       }))
     } catch(err) {
@@ -34,5 +39,7 @@ async function _render(node, prefix, options) {
 }
 
 export default function (root, dir, options) {
+  const cwd = process.cwd()
   _render.apply(this, arguments)
+  process.chdir(cwd)
 }
