@@ -1,5 +1,5 @@
-# pierresaux's blog
+# Example
 ---
-1. my blog
-2. React
-3. Markdown
+1. `yarn`
+2. `yarn run build`
+3. Enjoy!
