@@ -18,6 +18,8 @@ async function task(routePath, templatePath) {
     const { site } = require(path.resolve('.', routePath))
     const template = templatePath != null ? await fs.readFileAsync(path.resolve('.', templatePath), 'utf8') : null
 
+    console.log({ template })
+
     render(site, '.', { template })
   } catch(err) {
     console.error(err.stack)

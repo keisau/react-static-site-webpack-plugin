@@ -21,6 +21,7 @@ async function _render(node, prefix, options) {
     try {
       const destPath = path.resolve(prefix, name)
       const destFile = path.resolve(destPath, 'index.html')
+      const cwd = process.cwd()
 
       // mkdirp
       await mkdirp.mkdirpAsync(destPath)
@@ -32,6 +33,8 @@ async function _render(node, prefix, options) {
       await fs.writeFileAsync(destFile, template({
         app: renderToString(app)
       }))
+      
+      process.chdir(cwd)
     } catch(err) {
       console.error(err.stack)
     }
@@ -39,7 +42,5 @@ async function _render(node, prefix, options) {
 }
 
 export default function (root, dir, options) {
-  const cwd = process.cwd()
   _render.apply(this, arguments)
-  process.chdir(cwd)
 }
