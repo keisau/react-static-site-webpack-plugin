@@ -11,7 +11,6 @@ class Image extends Component {
     const hash = crypto.createHash('sha256').update(file).digest('hex').substring(0, 7)
     const ext = path.extname(props.src)
 
-    console.log(process.cwd())
     props.src = `./${hash}${ext}`
     fs.writeFileSync(props.src, file)
 

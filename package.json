@@ -1,7 +1,7 @@
 {
   "name": "zingtaai",
-  "version": "1.0.0-beta.2",
-  "description": "A very simple static site generator using React",
+  "version": "1.0.0-beta.3",
+  "description": "[Under Construction] A very simple static site generator using React",
   "main": "lib/index.js",
   "bin": { "zingtaai": "./bin/zingtaai" },
   "scripts": {
