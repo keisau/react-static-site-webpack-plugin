@@ -8,7 +8,7 @@ import { mkdirp, fs } from './utils'
 
 /* dfs on the route tree, generate index.html upon leaf nodes */
 async function _render(node, prefix, options) {
-  const { name, app, children } = node.props
+  const { name, component, children } = node.props
   let source = '{{{ app }}}'
   if (options != null && options.template != null) {
     source = options.template
@@ -17,7 +17,7 @@ async function _render(node, prefix, options) {
 
   React.Children.forEach(children, child => _render(child, path.resolve(prefix, name), options))
 
-  if (app != null) {
+  if (component != null) {
     try {
       const destPath = path.resolve(prefix, name)
       const destFile = path.resolve(destPath, 'index.html')
@@ -31,9 +31,9 @@ async function _render(node, prefix, options) {
 
       // write rendered html to file
       await fs.writeFileAsync(destFile, template({
-        app: renderToString(app)
+        app: renderToString(component)
       }))
-      
+
       process.chdir(cwd)
     } catch(err) {
       console.error(err.stack)
