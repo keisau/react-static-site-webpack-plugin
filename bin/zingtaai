@@ -1,5 +1,0 @@
-#! /usr/bin/env node
-
-const path = require('path')
-const child_process = require('child_process')
-child_process.fork(path.resolve(__dirname, '..', 'lib/zingtaai'), process.argv.splice(2))

@@ -1,14 +1,8 @@
 import path from 'path'
 
-import render from './render'
-import Route from './route'
-import Image from './image'
-
-export {
-  render,
-  Route,
-  Image
-}
+import RawSource from 'webpack-sources/lib/RawSource'
+import _eval from 'eval'
+import Promise from 'bluebird'
 
 function ReactStaticSitePlugin(name) {
   Object.assign(this, {
@@ -16,57 +10,80 @@ function ReactStaticSitePlugin(name) {
   })
 }
 
-async function _render(node, prefix, options) {
-  const { name, component, children } = node.props
-  let source = '{{{ app }}}'
-  if (options != null && options.template != null) {
-    source = options.template
-  }
-  const template = Handlebars.compile(source)
+function search(node, prefix, array) {
+  const { component } = node.props
+  const name = node.props.path
+  let { children } = node.props
 
-  React.Children.forEach(children, child => _render(child, path.resolve(prefix, name), options))
+  if (children != null) {
+    if (!Array.isArray(children)) {
+      children = [ children ]
+    }
+    children.forEach(child => search(child, path.join(prefix, name), array))
+  }
 
   if (component != null) {
     try {
-      const destPath = path.resolve(prefix, name)
-      const destFile = path.resolve(destPath, 'index.html')
-      const cwd = process.cwd()
+      const destPath = path.join(prefix, name)
+      // const destFile = path.join(destPath, 'index.html')
 
-      // mkdirp
-      await mkdirp.mkdirpAsync(destPath)
-
-      // chdir
-      process.chdir(destPath)
-
-      // write rendered html to file
-      await fs.writeFileAsync(destFile, template({
-        app: renderToString(component)
-      }))
-
-      process.chdir(cwd)
+      array.push(destPath)
     } catch(err) {
       console.error(err.stack)
     }
   }
+  return array
+}
+
+function getAsset(name, compilation, { assetsByChunkName }) {
+  let retval = compilation.assets[name]
+
+  if (retval != null) {
+    return retval
+  }
+
+  retval = assetsByChunkName[name]
+  if (retval == null) {
+    return null
+  }
+
+  if (Array.isArray(retval)) {
+    retval = retval[0]
+  }
+
+  return compilation.assets[retval]
 }
 
 ReactStaticSitePlugin.prototype.apply = function(compiler) {
   compiler.plugin('this-compilation', (compilation) => {
     compilation.plugin('optimize-assets', (_, cb) => {
-      //console.log(compilation, _)
+      const stats = compilation.getStats().toJson()
+
+      const asset = getAsset(this.name, compilation, stats)
 
       const entryPath = compilation.options.entry[this.name]
+      const { outputPath } = compiler
 
-      console.log(entryPath)
-      let entry = require(entryPath)
+      let entry = _eval(asset.source(), true)
       if (entry.hasOwnProperty('default')) {
         entry = entry['default']
       }
 
       const { template, routes, render } = entry
 
-      //_render(routes, outputPath, { template })
-      cb()
+      const promises = search(routes, '/', []).map((result, i, paths) => {
+        const resultPath = path.join(outputPath, result)
+
+        const promise = render({ paths })
+        const outputFile = path.join(result, 'index.html')
+
+        return promise.then(output => {
+          compilation.assets[outputFile] = new RawSource(output)
+        })
+      })
+
+      //_render(routes, outputPath, { template, placeholder: 'component' })
+      Promise.all(promises).nodeify(cb)
     })
   })
 }
