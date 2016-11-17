@@ -1,3 +1,5 @@
+import path from 'path'
+
 import render from './render'
 import Route from './route'
 import Image from './image'
@@ -51,18 +53,19 @@ async function _render(node, prefix, options) {
 ReactStaticSitePlugin.prototype.apply = function(compiler) {
   compiler.plugin('this-compilation', (compilation) => {
     compilation.plugin('optimize-assets', (_, cb) => {
-      console.log(compilation, _)
+      //console.log(compilation, _)
 
       const entryPath = compilation.options.entry[this.name]
 
+      console.log(entryPath)
       let entry = require(entryPath)
       if (entry.hasOwnProperty('default')) {
         entry = entry['default']
       }
 
-      const { routes, render } = entry
+      const { template, routes, render } = entry
 
-      _render(routes, outputPath, { template })
+      //_render(routes, outputPath, { template })
       cb()
     })
   })
