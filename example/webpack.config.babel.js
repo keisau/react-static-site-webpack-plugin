@@ -1,8 +1,9 @@
 import webpack from 'webpack'
 import path from 'path'
 import ExtractTextPlugin from 'extract-text-webpack-plugin'
-import ReactStaticSitePlugin from '../lib'
+import RemoveAssetsPlugin from 'remove-assets-webpack-plugin'
 
+import ReactStaticSitePlugin from '../lib'
 import routes from './src/js/routes'
 
 const srcPath = path.resolve(__dirname, 'src')
@@ -31,13 +32,7 @@ export default {
   },
   plugins: [
     new ExtractTextPlugin('styles.css'),
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'dev'),
-      }
-    }),
-    new webpack.optimize.DedupePlugin(),
-    new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }),
-    new ReactStaticSitePlugin('main')
+    new ReactStaticSitePlugin('main'),
+    new RemoveAssetsPlugin(/^bundle\.js$/)
   ]
 }

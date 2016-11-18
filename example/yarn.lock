@@ -3276,6 +3276,10 @@ regjsparser@^0.1.4:
   dependencies:
     jsesc "~0.5.0"
 
+remove-assets-webpack-plugin:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/remove-assets-webpack-plugin/-/remove-assets-webpack-plugin-1.0.0.tgz#89c47974fcf66390d6942602971f2294f94e643d"
+
 repeat-element@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/repeat-element/-/repeat-element-1.1.2.tgz#ef089a178d1483baae4d93eb98b4f9e4e11d990a"

@@ -4,9 +4,10 @@ import RawSource from 'webpack-sources/lib/RawSource'
 import _eval from 'eval'
 import Promise from 'bluebird'
 
-function ReactStaticSitePlugin(name) {
+function ReactStaticSitePlugin(name, context) {
   Object.assign(this, {
-    name
+    name,
+    context
   })
 }
 
@@ -59,33 +60,52 @@ ReactStaticSitePlugin.prototype.apply = function(compiler) {
     compilation.plugin('optimize-assets', (_, cb) => {
       const stats = compilation.getStats().toJson()
 
-      const asset = getAsset(this.name, compilation, stats)
+      try {
+        const { name, context } = this
+        const asset = getAsset(name, compilation, stats)
 
-      const entryPath = compilation.options.entry[this.name]
-      const { outputPath } = compiler
+        let entry = _eval(asset.source(), true)
+        if (entry.hasOwnProperty('default')) {
+          entry = entry['default']
+        }
 
-      let entry = _eval(asset.source(), true)
-      if (entry.hasOwnProperty('default')) {
-        entry = entry['default']
-      }
+        const { routes, render } = entry
 
-      const { template, routes, render } = entry
+        const promises = search(routes, '/', []).map((result, i, paths) => {
+          const outputFile = path.join(result, 'index.html')
+          const promise = new Promise((resolve, reject) => {
+            const retval = render({ paths, path: result, context }, (err, data) => {
+              if (err != null) {
+                return reject(err)
+              }
 
-      const promises = search(routes, '/', []).map((result, i, paths) => {
-        const resultPath = path.join(outputPath, result)
+              resolve(data)
+            })
 
-        const promise = render({ paths })
-        const outputFile = path.join(result, 'index.html')
+            /**
+             * if render() returns a promise, resolve it
+             * NOTE: this check is not necessary or sufficient
+             */
+            if (typeof retval.then === 'function') {
+              resolve(retval)
+            }
+          })
 
-        return promise.then(output => {
-          compilation.assets[outputFile] = new RawSource(output)
+          /* undefined behavior: if both cb and promise are provided, they will race to generate output file */
+          return promise.then(output => {
+            if (compilation.assets[outputFile] == null) {
+              compilation.assets[outputFile] = new RawSource(output)
+            }
+          })
         })
-      })
 
-      //_render(routes, outputPath, { template, placeholder: 'component' })
-      Promise.all(promises).nodeify(cb)
+        Promise.all(promises).nodeify(cb)
+      } catch(err) {
+        compilation.errors.push(err.stack)
+        cb()
+      }
     })
   })
 }
 
-module.exports =  ReactStaticSitePlugin
+module.exports = ReactStaticSitePlugin
