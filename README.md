@@ -96,6 +96,7 @@ export default {
 
 ## Contribute
 I am looking forward to feedbacks. Make sure your issues or emails state the main point and cover:
+
 1. Facts,
 2. Constructive opinions, or
 3. Working codes that improve/fix
