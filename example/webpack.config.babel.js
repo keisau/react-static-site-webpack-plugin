@@ -4,7 +4,6 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin'
 import RemoveAssetsPlugin from 'remove-assets-webpack-plugin'
 
 import ReactStaticSitePlugin from '../lib'
-import routes from './src/js/routes'
 
 const srcPath = path.resolve(__dirname, 'src')
 const jsPath = path.resolve(srcPath, 'js')

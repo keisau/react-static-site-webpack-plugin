@@ -9,3 +9,6 @@ lib
 
 # logs
 *.log
+
+# example's build
+dist
