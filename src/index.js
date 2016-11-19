@@ -12,6 +12,12 @@ export default class {
     })
   }
 
+  /**
+   * given a <Route> node, a prefix and a results array,
+   * search for endpoint components and push the resulted path to
+   * the results array.
+   * a typical DFS algorithm
+   */
   search(node, prefix, array) {
     const { component } = node.props
     const name = node.props.path || '/'
@@ -54,6 +60,10 @@ export default class {
     return compilation.assets[retval]
   }
 
+  /**
+   * find out a route given a target path,
+   * a path matching algorithm
+   */
   followPath(routes, targetPath) {
     const pathChunks = targetPath.split('/')
     let results = []
