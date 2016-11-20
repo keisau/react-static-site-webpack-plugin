@@ -33,7 +33,7 @@ export default class {
         const destPath = path.join(prefix, name)
         // const destFile = path.join(destPath, 'index.html')
 
-        array.push(destPath)
+        array.push({ route: node, routePath: destPath })
       } catch(err) {
         console.error(err.stack)
       }
@@ -60,57 +60,6 @@ export default class {
     return compilation.assets[retval]
   }
 
-  /**
-   * find out a route given a target path,
-   * a path matching algorithm
-   */
-  followPath(routes, targetPath) {
-    const pathChunks = targetPath.split('/')
-    let results = []
-
-    for (let i = 0; i < routes.length; ++i) {
-      const route = routes[i]
-      const routePath = route.props.path
-      let { children } = route.props
-      children = Array.isArray(children) ? children : [ children ]
-      children = children.filter(child => child != null)
-
-      /* IndexRoute */
-      if ((targetPath === '/' || targetPath === '') && routePath == null) {
-        return [ route ]
-      }
-
-      if (targetPath !== '/' && routePath == null) {
-        continue
-      }
-
-      const routePathChunks = routePath.split('/')
-
-      let hasMatch = false
-      let j = 0
-
-      /* path following */
-      for (; j < pathChunks.length && j < routePathChunks.length; ++j) {
-        if (routePathChunks[j] !== pathChunks[j]) {
-          break
-        } else {
-          hasMatch = true
-        }
-      }
-
-      if (hasMatch) {
-        if (j === pathChunks.length && children.length === 0) {
-          return [ route ]
-        } else {
-
-          results = results.concat(this.followPath(children, pathChunks.splice(j).join('/')))
-        }
-      }
-    }
-
-    return results
-  }
-
   apply(compiler) {
     compiler.plugin('this-compilation', (compilation) => {
       compilation.plugin('optimize-assets', (_, cb) => {
@@ -128,11 +77,11 @@ export default class {
           const { routes, render } = entry
 
           const pathArray = this.search(routes, '/', [])
-          const promises = pathArray.map((result, i, paths) => {
-            const route = this.followPath([ routes ], result).filter(res => res != null)[0]
-            const outputFile = path.join(result, 'index.html')
+          const promises = pathArray.map(({ routePath, route }, i, paths) => {
+            //const route = this.followPath([ routes ], routePath).filter(res => res != null)[0]
+            const outputFile = path.join(routePath, 'index.html')
             const promise = new Promise((resolve, reject) => {
-              const retval = render({ paths, path: result, route, context }, (err, data) => {
+              const retval = render({ paths, path: routePath, route, context }, (err, data) => {
                 if (err != null) {
                   return reject(err)
                 }
