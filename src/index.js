@@ -19,19 +19,33 @@ export default class {
    * a typical DFS algorithm
    */
   search(node, prefix, array) {
-    const { component } = node.props
-    const name = node.props.path || '/'
-    let { children } = node.props
+    let component = null
+    let name = null
+    let children = null
+    let indexRoute = null
+
+    if (node.props != null) {
+      component = node.props.component
+      name = node.props.path || '/'
+      children = node.props.children
+      indexRoute = node.props.indexRoute
+    } else {
+      component = node.component
+      name = node.path || '/'
+      children = node.children
+      indexRoute = node.indexRoute
+    }
 
     if (children != null) {
       if (!Array.isArray(children)) {
         children = [ children ]
       }
       children.forEach(child => this.search(child, path.join(prefix, name), array))
+    } else if (indexRoute != null) {
+      this.search(indexRoute, path.join(prefix, name), array)
     } else if (component != null) {
       try {
         const destPath = path.join(prefix, name)
-        // const destFile = path.join(destPath, 'index.html')
 
         array.push({ route: node, routePath: destPath })
       } catch(err) {
